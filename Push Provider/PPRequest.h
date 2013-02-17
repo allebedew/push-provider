@@ -8,9 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^PPRequestCompletion)(void);
+
 @interface PPRequest : NSObject
 
 - (id)initWithToken:(NSData*)token payload:(NSString*)payload identity:(SecIdentityRef)identity sandbox:(BOOL)isSandbox;
-- (void)run;
+- (void)runWithCompletion:(PPRequestCompletion)completion;
 
 @end

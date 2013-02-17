@@ -19,7 +19,8 @@ typedef enum {
 @property (nonatomic, strong) GCDAsyncSocket *socket;
 @property (nonatomic, strong) NSData *message;
 @property (nonatomic, assign) SecIdentityRef identity;
-@property (nonatomic, assign) BOOL isSandbox; 
+@property (nonatomic, assign) BOOL isSandbox;
+@property (nonatomic, strong) PPRequestCompletion completion;
 
 @end
 
@@ -56,7 +57,9 @@ typedef enum {
     return self;
 }
 
-- (void)run {
+- (void)runWithCompletion:(PPRequestCompletion)completion {
+    self.completion = completion;
+
     NSLog(@"Running req");
     self.socket = [[GCDAsyncSocket alloc] init];
     [self.socket setDelegate:self delegateQueue:dispatch_get_current_queue()];
@@ -70,6 +73,10 @@ typedef enum {
     }
     
     [_socket startTLS:@{(NSString*)kCFStreamSSLCertificates:@[(__bridge id)self.identity], (NSString*)kCFStreamSSLPeerName:host}];
+}
+
+- (void)complete {
+    self.completion();
 }
 
 #pragma mark - GCDAsyncSocket Delegate
@@ -148,6 +155,7 @@ typedef enum {
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err {
     NSLog(@"disconnected: %@", err);
+    [self complete];
 }
 
 @end

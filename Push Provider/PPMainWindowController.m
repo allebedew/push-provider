@@ -16,7 +16,6 @@
 @property (nonatomic, strong) NSString *payload;
 @property (nonatomic, strong) NSString *identityName;
 @property (nonatomic, assign) SecIdentityRef identity;
-@property (nonatomic, strong) PPRequest *request;
 
 - (IBAction)showIdentityChooser:(id)sender;
 - (IBAction)sendPushNotification:(id)sender;
@@ -28,17 +27,30 @@
 - (void)awakeFromNib {
     self.token = @"ff211390 ab00f780 0ab12e4f 2194e8bb df208b00 6cf4c199 af04a809 fcb7516a";
     self.payload = @"{\"aps\":{\"alert\":\"You have mail!\"}}";
+    self.identityName = [[NSUserDefaults standardUserDefaults] objectForKey:@"Identity"];
 }
 
-- (NSData*)dataWithHexString:(NSString*)string {
-    NSMutableData *data = [NSMutableData data];
-    NSScanner *scanner = [NSScanner scannerWithString:string];
-    unsigned int word;
-    while ([scanner scanHexInt:&word]) {
-        unsigned int invWord = NSSwapInt(word);
-        [data appendBytes:&invWord length:sizeof(invWord)];
+#pragma mark - Identity
+
++ (NSSet*)keyPathsForValuesAffectingIdentityName {
+    return [NSSet setWithObject:@"identity"];
+}
+
+- (NSString*)identityName {
+    if (self.identity) {
+        SecCertificateRef cert = NULL;
+        if (SecIdentityCopyCertificate(self.identity, &cert) == noErr) {
+            CFStringRef commonName = NULL;
+            SecCertificateCopyCommonName(cert, &commonName);
+            CFRelease(cert);
+            return (__bridge_transfer NSString *)commonName;
+        }
     }
-    return data;
+    return nil;
+}
+
+- (void)setIdentityName:(NSString *)identityName {
+    NSLog(@"set identity: %@", identityName);
 }
 
 - (IBAction)showIdentityChooser:(id)sender {
@@ -55,30 +67,101 @@
 	[panel beginSheetForWindow:self.window modalDelegate:self didEndSelector:@selector(chooseIdentityPanelDidEnd:returnCode:contextInfo:) contextInfo:nil identities:resIdentities message:@"Choose the identity to use for delivering notifications: \n(Issued by Apple in the Provisioning Portal)"];
 }
 
-- (IBAction)sendPushNotification:(id)sender {
-    self.request = [[PPRequest alloc] initWithToken:[self dataWithHexString:self.token] payload:self.payload identity:self.identity sandbox:YES];
-    [self.request run];
-}
-
-#pragma mark - SFChooseIdentityPanel Delegate
-
 - (void)chooseIdentityPanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if (returnCode != NSFileHandlingPanelOKButton) {
         return;
     }
+    [self willChangeValueForKey:@"identityName"]; // force UI update
     self.identity = [SFChooseIdentityPanel sharedChooseIdentityPanel].identity;
-    
-    SecCertificateRef cert = NULL;
-    if (noErr == SecIdentityCopyCertificate(self.identity, &cert)) {
-        CFStringRef commonName = NULL;
-        SecCertificateCopyCommonName(cert, &commonName);
-        CFRelease(cert);
-        self.identityName = (__bridge_transfer NSString *)commonName;
-    } else {
-        self.identityName = @"None";
-    }
-
+    [self didChangeValueForKey:@"identityName"];
+    [[NSUserDefaults standardUserDefaults] setObject:self.identityName forKey:@"Identity"];
 }
 
+#pragma mark -
+
+- (IBAction)sendPushNotification:(id)sender {
+    __block PPRequest *request = [[PPRequest alloc] initWithToken:[self dataWithHexString:self.token] payload:self.payload identity:self.identity sandbox:YES];
+    [request runWithCompletion:^{
+        NSLog(@"req complete");
+        request = nil;
+    }];
+}
+
+- (NSData*)dataWithHexString:(NSString*)string {
+    NSMutableData *data = [NSMutableData data];
+    NSScanner *scanner = [NSScanner scannerWithString:string];
+    unsigned int word;
+    while ([scanner scanHexInt:&word]) {
+        unsigned int invWord = NSSwapInt(word);
+        [data appendBytes:&invWord length:sizeof(invWord)];
+    }
+    return data;
+}
+
+
+/*- (IBAction)exportIdentity:(id)sender {
+ if (self.APNS.identity != NULL) {
+ CFDataRef data = NULL;
+ 
+ // Generate a random passphrase and filename
+ NSString *passphrase = [[NSUUID UUID] UUIDString];
+ NSString *PKCS12FileName = [[NSUUID UUID] UUIDString];
+ 
+ // Export to PKCS12
+ SecItemImportExportKeyParameters keyParams = {
+ SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION,
+ 0,
+ (__bridge CFStringRef)passphrase,
+ NULL,
+ NULL,
+ NULL,
+ NULL,
+ (__bridge CFArrayRef)@[@(CSSM_KEYATTR_PERMANENT)]
+ };
+ 
+ if (noErr == SecItemExport(self.APNS.identity,
+ kSecFormatPKCS12,
+ 0,
+ &keyParams,
+ &data)) {
+ 
+ NSSavePanel *panel = [NSSavePanel savePanel];
+ [panel setPrompt:@"Export"];
+ [panel setNameFieldLabel:@"Export As:"];
+ [panel setNameFieldStringValue:@"cert.pem"];
+ 
+ [panel beginSheetModalForWindow:self.window
+ completionHandler:^(NSInteger result) {
+ if (result == NSFileHandlingPanelCancelButton)
+ return;
+ 
+ // Write to temp file
+ NSURL *tempURL = [NSURL fileURLWithPath:NSTemporaryDirectory()];
+ tempURL = [tempURL URLByAppendingPathComponent:PKCS12FileName];
+ 
+ [(__bridge NSData *)data writeToURL:tempURL atomically:YES];
+ 
+ // convert with openssl to pem
+ NSTask *task = [NSTask new];
+ [task setLaunchPath:@"/bin/sh"];
+ [task setArguments:@[
+ @"-c",
+ [NSString stringWithFormat:@"/usr/bin/openssl pkcs12 -in %@ -out %@ -nodes", tempURL.path, panel.URL.path]
+ ]];
+ 
+ // Remove temp file on completion
+ [task setTerminationHandler:^(NSTask *task) {
+ [[NSFileManager defaultManager] removeItemAtURL:tempURL error:NULL];
+ }];
+ 
+ NSPipe *pipe = [NSPipe pipe];
+ [pipe.fileHandleForWriting writeData:[[NSString stringWithFormat:@"%@\n", passphrase] dataUsingEncoding:NSUTF8StringEncoding]];
+ [task setStandardInput:pipe];
+ 
+ [task launch];
+ }];
+ }
+ }
+ }*/
 
 @end
