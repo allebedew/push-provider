@@ -22,6 +22,8 @@
 		A148087516D0F66B0088BEDF /* PPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = A148087316D0F66B0088BEDF /* PPRequest.m */; };
 		A148087716D0F6BA0088BEDF /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A148087616D0F6BA0088BEDF /* SecurityInterface.framework */; };
 		A148087916D0F6C10088BEDF /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A148087816D0F6C10088BEDF /* Security.framework */; };
+		A1DFEE9C16D15B49000019FF /* NSObject+DataTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = A1DFEE9B16D15B49000019FF /* NSObject+DataTransformers.m */; };
+		A1DFEE9D16D15B49000019FF /* NSObject+DataTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = A1DFEE9B16D15B49000019FF /* NSObject+DataTransformers.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +64,8 @@
 		A148087316D0F66B0088BEDF /* PPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PPRequest.m; sourceTree = "<group>"; };
 		A148087616D0F6BA0088BEDF /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = System/Library/Frameworks/SecurityInterface.framework; sourceTree = SDKROOT; };
 		A148087816D0F6C10088BEDF /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		A1DFEE9A16D15B49000019FF /* NSObject+DataTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+DataTransformers.h"; sourceTree = "<group>"; };
+		A1DFEE9B16D15B49000019FF /* NSObject+DataTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+DataTransformers.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +135,8 @@
 		A11E8B7716D0F52900F9B99F /* Push Provider */ = {
 			isa = PBXGroup;
 			children = (
+				A1DFEE9A16D15B49000019FF /* NSObject+DataTransformers.h */,
+				A1DFEE9B16D15B49000019FF /* NSObject+DataTransformers.m */,
 				A148087016D0F66B0088BEDF /* PPMainWindowController.h */,
 				A148087116D0F66B0088BEDF /* PPMainWindowController.m */,
 				A148087216D0F66B0088BEDF /* PPRequest.h */,
@@ -191,8 +197,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A11E8B9F16D0F52900F9B99F /* Build configuration list for PBXNativeTarget "Push Provider" */;
 			buildPhases = (
-				A11E8B6A16D0F52900F9B99F /* Sources */,
 				A11E8B6B16D0F52900F9B99F /* Frameworks */,
+				A11E8B6A16D0F52900F9B99F /* Sources */,
 				A11E8B6C16D0F52900F9B99F /* Resources */,
 			);
 			buildRules = (
@@ -298,6 +304,7 @@
 				A148086F16D0F65D0088BEDF /* GCDAsyncSocket.m in Sources */,
 				A148087416D0F66B0088BEDF /* PPMainWindowController.m in Sources */,
 				A148087516D0F66B0088BEDF /* PPRequest.m in Sources */,
+				A1DFEE9C16D15B49000019FF /* NSObject+DataTransformers.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,6 +313,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A11E8B9C16D0F52900F9B99F /* Push_ProviderTests.m in Sources */,
+				A1DFEE9D16D15B49000019FF /* NSObject+DataTransformers.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,26 +7,22 @@
 //
 
 #import "Push_ProviderTests.h"
+#import "NSObject+DataTransformers.h"
 
 @implementation Push_ProviderTests
 
-- (void)setUp
-{
+- (void)setUp {
     [super setUp];
-    
-    // Set-up code here.
 }
 
-- (void)tearDown
-{
-    // Tear-down code here.
-    
+- (void)tearDown {
     [super tearDown];
 }
 
-- (void)testExample
-{
-    STFail(@"Unit tests are not implemented yet in Push ProviderTests");
+- (void)testApnsTokenData {
+    NSString *description = @"<ff211390 ab00f780 0ab12e4f 2194e8bb df208b00 6cf4c199 af04a809 fcb7516a>";
+    NSString *token1 = @"ff211390 ab00f780 0ab12e4f 2194e8bb df208b00 6cf4c199 af04a809 fcb7516a";
+    STAssertTrue([token1.apnsTokenData.description isEqual:description], @"Plain token decription");
 }
 
 @end
